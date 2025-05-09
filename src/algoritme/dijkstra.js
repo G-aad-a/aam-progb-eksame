@@ -7,6 +7,7 @@ class dijkstra extends algoritme {
                 previousNode: null
             };
         });
+        
         const hasVisited = [];
         const startNode = graph.find(node => node.name === startName);
         startNode.weight = 0;
