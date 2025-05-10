@@ -1,54 +1,84 @@
-class dijkstra extends algoritme {
-    calculate(startName, targetName) {
-        const length = graph.length;
-        const nodes = nodes.map(node => {
-            return {
-                ...node,
+class Dijkstra {
+
+    constructor() {
+        this.nodes = [];
+        this.startNode = null;
+        this.targetNode = null;
+        this.hasVisited = [];
+    }
+
+    setGraph(graph) {
+        this.graph = graph;
+        console.log(graph.nodes);
+
+        this.nodes = Object.fromEntries(Object.entries(graph.nodes).map(([key, value]) => {
+            return [key, {
+                ...value,
+                weight: Infinity,
                 previousNode: null
-            };
-        });
-        
-        const hasVisited = [];
-        const startNode = graph.find(node => node.name === startName);
-        startNode.weight = 0;
+            }];
+        }));
+
+        //const startNode = graph.no(node => node.name === startName);
+        this.hasVisited = [];
+      
+    }
+
+    #sortGraph = () => {
+        const sortedEntries = Object.entries(this.nodes).sort(([, a], [, b]) => a.weight - b.weight);
+        this.nodes = Object.fromEntries(sortedEntries);
+    };
+
+    calculate(startNodeKey, targetNodeKey) {
+        if (!this.startNode) {
+            this.startNode = this.nodes[startNodeKey];
+            this.startNode.weight = 0;
+        }
     
-        while (hasVisited.length < length) {
-            this.sortGraph();
-            if(!nodes || nodes == [])
-                break;
+        if (!this.targetNode) {
+            this.targetNode = this.nodes[targetNodeKey];
+            this.targetNodeKey = targetNodeKey;
+        }
+        if (this.hasVisited.length >= Object.keys(this.nodes).length)
+            return this.hasVisited;
     
-            const currentNode = nodes.pop(0)
-            if(currentNode in nodes)
-                continue;
+        // Get all unvisited nodes and sort by weight
+        const unvisited = Object.entries(this.nodes)
+            .filter(([key]) => !this.hasVisited.includes(key))
+            .sort(([, a], [, b]) => a.weight - b.weight);
     
-            hasVisited.push(currentNode);
-            if(node.name == targetName)
-                break;
+        if (unvisited.length === 0)
+            return false;
     
-            for(const node in nodes) {
-                const neighbourNodes = null; // GetNeighbours(node)
-                for(const neighbourNode in neighbourNodes) {
-                    const edge = [currentNode, neighbourNode];
-                    const weight = node.weight + neighbourNode.weight;
+        const [currentKey, currentNode] = unvisited[0];
+        this.hasVisited.push(currentKey);
     
-                    if(weight < neighbourNode.weight) {
-                        neighbourNode.weight = weight;
-                        neighbourNode.previousNode = node;
-                    }
-                } 
+        if (currentKey === targetNodeKey)
+            return true;
+    
+        const neighbours = this.graph.edges[currentKey];
+        for (const neighbourKey in neighbours) {
+            const weightToNeighbour = neighbours[neighbourKey]; // e.g., 2
+            const neighbourNode = this.nodes[neighbourKey];
+            const totalWeight = currentNode.weight + weightToNeighbour;
+    
+            if (totalWeight < neighbourNode.weight) {
+                neighbourNode.weight = totalWeight;
+                neighbourNode.previousNode = currentKey;
             }
         }
-        const finalPath = [];
-        var targetNode = nodes.find(node => node.name == targetName);
     
-        while(targetNode && targetNode != startNode) {
-            finalPath.push(targetNode);
-            targetNode = null; // GetNode(targetNode.previousNode)
+        return this.hasVisited;
+    }
+
+    getShortestPath() {
+        const path = [];
+        let currentNode = this.targetNodeKey;
+        while (currentNode) {
+            path.unshift(currentNode);
+            currentNode = this.nodes[currentNode].previousNode;
         }
-    
-        finalPath.push(startNode);
-        finalPath.reverse();
-    
-        return finalPath;
+
+        return path;
     }
 }

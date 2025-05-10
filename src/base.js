@@ -7,6 +7,7 @@ class Graph {
         this.size = { mapWidth: 0, mapHeight: 0, tileSize: 0 };
         this.searchedNodes = [];
         this.currentNode = null;
+        this.algorithm = null;
     }
 
     #nodeName = (x, y) => `${x},${y}`;
@@ -18,6 +19,12 @@ class Graph {
         this.edges = data.edges || this.edges;
         this.weights = data.weights || this.weights;
         this.size = data.size || this.size;
+        return this;
+    }
+
+    setAlgorithm(algorithm) {
+        this.algorithm = algorithm;
+        this.algorithm.setGraph(this);
         return this;
     }
 
@@ -165,17 +172,24 @@ class Render {
                 }
             }
         });
-        this.graph.searchedNodes = Object.keys(this.graph.nodes).slice(0, 5); // Simulate some searched nodes
+        //this.graph.searchedNodes = Object.keys(this.graph.nodes).slice(0, 5); // Simulate some searched nodes
     }
 
     reset() {
         this.graph.searchedNodes = [];
         this.isSearching = false;
+        this.graph.algorithm = null;
     }
 
     start() {
         this.i = 0;
         this.isSearching = true;
+
+        const nodeKeys = Object.keys(this.graph.nodes);
+                    
+        this.startNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
+        this.targetNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
+    
     }
 
     renderFrame() {
@@ -183,8 +197,26 @@ class Render {
        
         if (this.isSearching) {
             this.i++;
-            if (this.i >= 500) {
-               // Next step in your algorithm
+            //console.log("i:", this.i);
+            if (this.i >= 4) {
+                console.log("Searching...");
+                if(this.graph.algorithm) {
+                    let result = this.graph.algorithm.calculate(this.startNode, this.targetNode);
+                    if (typeof result === "object") {
+                        this.graph.searchedNodes = result;
+                    } else if (result === false) {
+                        console.log("No path found");
+                        this.isSearching = false;
+                    } else if (result === true) {
+                        console.log("Path found");
+                        this.graph.searchedNodes = this.graph.algorithm.getShortestPath();
+
+                        this.isSearching = false;
+                    }
+                    
+                    console.log("Searched Nodes:", this.graph.searchedNodes);
+                }
+                this.i = 0;
             }
         }
 
@@ -209,6 +241,7 @@ class Render {
         for (const node in this.graph.nodes) {
             const { x, y } = this.graph.nodes[node];
 
+            //console.log(this.graph.searchedNodes)
             if (this.graph.searchedNodes.includes(node)) {
                 this.ctx.fillStyle = "#facc00"; // gul farve
             } else {
