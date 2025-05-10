@@ -5,12 +5,12 @@ class Graph {
         this.edges = {}; // { name: { neighborName: weight } }
         this.weights = {}; // { name: { neighborName: weight } }
         this.size = { mapWidth: 0, mapHeight: 0, tileSize: 0 };
+        this.searchedNodes = [];
+        this.currentNode = null;
     }
 
-    #getRandomInt = (max) => Math.floor(Math.random() * max);
-
     #nodeName = (x, y) => `${x},${y}`;
-    
+
     setGraph(data) {
         if (!data) return;
 
@@ -38,7 +38,7 @@ class Graph {
                 weights[name] = {};
             }
         }
-    
+
         // Create edges and weights (4-directional: up, down, left, right)
         for (let x = 0; x < mapWidth; x++) {
             for (let y = 0; y < mapHeight; y++) {
@@ -49,7 +49,7 @@ class Graph {
                     [x, y - 1], // up / op
                     [x, y + 1]  // down / ned
                 ];
-    
+
                 for (const [nx, ny] of neighbors) {
                     if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
                         const neighborName = this.#nodeName(nx, ny);
@@ -59,7 +59,7 @@ class Graph {
                 }
             }
         }
-    
+
         console.log("Graph Nodes:", nodes);
         console.log("Graph Edges:", edges);
         console.log("Graph Weights:", weights);
@@ -71,6 +71,7 @@ class Graph {
 
 class Render {
 
+
     getTileColor = (nodeIndex) => {
         const weight = this.graph.weights[nodeIndex];
         const weightValues = Object.values(weight); // tager kun value istedet for key:value i nodens weights
@@ -78,17 +79,20 @@ class Render {
         let cost = weightValues.length > 0 ? Math.min(...weightValues) : 0; // finder den mindste værdi i weightValues arrayet hvis at længden er større end 0 ellers returner 0
         cost = Math.max(0, Math.min(cost, 10)); // clamper for at holde værdien mellem 0 og 10
         const shade = 255 - cost * 25;
-        return `rgb(${shade}, ${shade}, ${shade})`; // darker = higher cost
+        return { shade: `rgb(${shade}, ${shade}, ${shade})`, intShade: shade }; // darker = higher cost
     };
 
     constructor(graph) {
         const { mapWidth, mapHeight, tileSize } = graph.size;
-        
+
         this.graph = graph;
         this.tileSize = tileSize;
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
-        this.margin = 10; 
+        this.margin = 10;
+
+        this.width = this.mapWidth * (this.tileSize + this.margin)
+        this.height = this.mapHeight * (this.tileSize + this.margin)
 
         this.canvas = document.getElementById("main");
         if (!this.canvas) {
@@ -96,7 +100,7 @@ class Render {
         }
 
         this.ctx = this.canvas.getContext("2d");
-        this.canvas.width = window.innerWidth; 
+        this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight; // Havde trukket et par pixels fra men endte med at sætte overflow til hidden i css
         this.canvas.style.backgroundColor = "#737373"
 
@@ -110,10 +114,81 @@ class Render {
             y: (this.canvas.height - (this.mapHeight * this.tileSize + this.margin)) / 2
         };
 
+        const buttonWidth = 100;
+        const buttonHeight = 30;
+        const buttonGap = 20;
+
+        // Calculate positions based on your layout
+        const totalWidth = buttonWidth * 2 + buttonGap;
+        const startX = (this.startPosition.x + this.width / 2) - (totalWidth / 2);
+        const buttonY = this.startPosition.y + this.height;
+
+        // Save buttons for drawing and clicking
+        this.buttons = [
+            { label: "Reset", x: startX, y: buttonY, width: buttonWidth, height: buttonHeight },
+            { label: "Start", x: startX + buttonWidth + buttonGap, y: buttonY, width: buttonWidth, height: buttonHeight }
+        ];
+
         console.log("Start Position:", this.startPosition);
+
+        this.hoveredTile = null;
+
+        this.canvas.addEventListener("mousemove", (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const gridX = Math.floor((mouseX - this.startPosition.x) / (this.tileSize + this.margin));
+            const gridY = Math.floor((mouseY - this.startPosition.y) / (this.tileSize + this.margin));
+
+            const nodeName = `${gridX},${gridY}`;
+            this.hoveredTile = this.graph.nodes[nodeName] ? nodeName : null;
+        });
+
+        this.canvas.addEventListener("click", (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            for (const button of this.buttons) {
+                if (
+                    mouseX >= button.x &&
+                    mouseX <= button.x + button.width &&
+                    mouseY >= button.y &&
+                    mouseY <= button.y + button.height
+                ) {
+                    if (button.label === "Reset") {
+                        this.reset(); // Call your reset logic
+                    } else if (button.label === "Start") {
+                        this.start(); // Call your undo logic
+                    }
+                }
+            }
+        });
+        this.graph.searchedNodes = Object.keys(this.graph.nodes).slice(0, 5); // Simulate some searched nodes
+    }
+
+    reset() {
+        this.graph.searchedNodes = [];
+        this.isSearching = false;
+    }
+
+    start() {
+        this.i = 0;
+        this.isSearching = true;
     }
 
     renderFrame() {
+
+       
+        if (this.isSearching) {
+            this.i++;
+            if (this.i >= 500) {
+               // Next step in your algorithm
+            }
+        }
+
+
         // clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -129,18 +204,63 @@ class Render {
         this.ctx.fillText("Node Size: " + this.mapWidth * this.mapHeight, 10, 50);
         this.ctx.fillText("Tile Size: " + this.tileSize, 10, 80);
         this.ctx.fillText("Margin: " + this.margin, 10, 110);
-        
 
         // draw grid
-        for (const node in g.nodes) {
-            const { x, y } = g.nodes[node];
+        for (const node in this.graph.nodes) {
+            const { x, y } = this.graph.nodes[node];
 
-            this.ctx.fillStyle = this.getTileColor(node);
+            if (this.graph.searchedNodes.includes(node)) {
+                this.ctx.fillStyle = "#facc00"; // gul farve
+            } else {
+                this.ctx.fillStyle = this.getTileColor(node).shade;
+            }
             this.ctx.fillRect(this.startPosition.x + x * (this.tileSize + this.margin), this.startPosition.y + y * (this.tileSize + this.margin), this.tileSize, this.tileSize);
-            this.ctx.strokeStyle = "#000000";
+
             this.ctx.strokeRect(this.startPosition.x + x * (this.tileSize + this.margin), this.startPosition.y + y * (this.tileSize + this.margin), this.tileSize + 5, this.tileSize + 5);
         }
-        
+
+        // draw Button
+        this.ctx.font = "16px Arial";
+        this.ctx.textBaseline = "middle";
+
+        this.buttons.forEach(button => {
+            // Draw button background
+            this.ctx.fillStyle = "#FFFFFF";
+            this.ctx.fillRect(button.x, button.y, button.width, button.height);
+
+            // Draw border
+            this.ctx.strokeStyle = "#000000";
+            this.ctx.strokeRect(button.x, button.y, button.width, button.height);
+
+            // Draw centered text
+            this.ctx.fillStyle = "#000000";
+            const textWidth = this.ctx.measureText(button.label).width;
+            const textX = button.x + (button.width - textWidth) / 2;
+            const textY = button.y + button.height / 2;
+
+            this.ctx.fillText(button.label, textX, textY);
+        });
+
+
+       // console.log("Hovered Tile:", this.hoveredTile); // DEBUG PURPOSES
+
+        if (this.hoveredTile) {
+            const { x, y } = this.graph.nodes[this.hoveredTile];
+            const weights = this.graph.weights[this.hoveredTile];
+
+            // Get average or min weight
+            const weightList = Object.values(weights);
+            const displayWeight = weightList.length ? Math.min(...weightList) : 0;
+
+            // Draw text
+            this.ctx.font = "16px sans-serif";
+            this.ctx.fillText(
+                `W: ${displayWeight}`,
+                this.startPosition.x + x * (this.tileSize + this.margin) + 10,
+                this.startPosition.y + y * (this.tileSize + this.margin) + 20
+            );
+        }
+
         requestAnimationFrame(this.renderFrame.bind(this));
     }
 
@@ -155,15 +275,3 @@ class Render {
 
 }
 
-
-const size = {
-    mapWidth: 9,
-    mapHeight: 9,
-    tileSize: 50,
-};
-
-const g = new Graph();
-g.setGraph(g.generateNodeMap(size));
-
-
-new Render(g).startRendering();
