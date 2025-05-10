@@ -63,14 +63,6 @@ class Dijkstra {
         return this.hasVisited;
     }
 
-    heuristic(nodeKey, targetKey) {
-        const node = this.graph.nodes[nodeKey];
-        const target = this.graph.nodes[targetKey];
-        const dx = node.x - target.x;
-        const dy = node.y - target.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     getShortestPath() {
         const path = [];
         let currentNode = this.targetNodeKey;
