@@ -131,6 +131,8 @@ class Render {
         const buttonHeight = 30;
         const buttonGap = 20;
 
+        this.currentButton = "Dijkstra"; // Default button
+
         // Calculate positions based on your layout
         const totalWidth = buttonWidth * 2 + buttonGap;
         const startX = (this.startPosition.x + this.width / 2) - (totalWidth / 2);
@@ -139,7 +141,9 @@ class Render {
         // Save buttons for drawing and clicking
         this.buttons = [
             { label: "Reset", x: startX, y: buttonY, width: buttonWidth, height: buttonHeight },
-            { label: "Start", x: startX + buttonWidth + buttonGap, y: buttonY, width: buttonWidth, height: buttonHeight }
+            { label: "Start", x: startX + buttonWidth + buttonGap, y: buttonY, width: buttonWidth, height: buttonHeight },
+            { label: "Dijkstra", x: startX, y: buttonY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight },
+            { label: "Astar", x: startX + buttonWidth + buttonGap, y: buttonY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight },
         ];
 
         console.log("Start Position:", this.startPosition);
@@ -172,10 +176,17 @@ class Render {
                     mouseY <= button.y + button.height
                 ) {
                     if (button.label === "Reset") {
-                        this.reset(); // Call your reset logic
+                        this.reset(); 
                     } else if (button.label === "Start") {
-                        this.start(); // Call your undo logic
+                        this.start(); 
+                    } else if(button.label === "Dijkstra") {
+                        this.graph.setAlgorithm(new Dijkstra());
+                        this.currentButton = button.label;
+                    } else if(button.label === "Astar") {
+                        this.graph.setAlgorithm(new Astar());
+                        this.currentButton = button.label;
                     }
+                    
                 }
             }
         });
@@ -188,7 +199,10 @@ class Render {
         let d2 = new Dijkstra();
         g2.setGraph(g2.generateNodeMap(size));
         g2.setAlgorithm(d2);
-        new Render(g2).startRendering();
+        let r  = new Render(g2)
+        r.currentButton = null;
+        r.startRendering();
+
     }
 
     start() {
@@ -204,7 +218,7 @@ class Render {
         if (this.isSearching) {
             this.i++;
             //console.log("i:", this.i);
-            if (this.i >= 1) {
+            if (this.i >= 6) {
                 console.log("Searching...");
                 if(this.graph.algorithm) {
                     let result = this.graph.algorithm.calculate(this.startNode, this.targetNode);
@@ -269,7 +283,12 @@ class Render {
 
         this.buttons.forEach(button => {
             // Draw button background
-            this.ctx.fillStyle = "#FFFFFF";
+            if (this.currentButton === button.label) {
+                this.ctx.fillStyle = "#008000"; // green highlight color
+            } else {
+                this.ctx.fillStyle = "#aaaaaa"; // Default color
+            }
+
             this.ctx.fillRect(button.x, button.y, button.width, button.height);
 
             // Draw border

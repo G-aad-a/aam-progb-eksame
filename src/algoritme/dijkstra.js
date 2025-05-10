@@ -11,7 +11,7 @@ class Dijkstra {
         this.graph = graph;
 
         this.nodes = Object.fromEntries(Object.entries(graph.nodes).map(([key, value]) => {
-            return [key, {
+            return [key, {  
                 ...value,
                 g: Infinity,
                 previousNode: null
