@@ -183,27 +183,28 @@ class Render {
     }
 
     reset() {
-        this.graph.searchedNodes = [];
-        this.isSearching = false;
-        
         this.stopRendering();
-        delete this;
+        let g2 = new Graph();
+        let d2 = new Dijkstra();
+        g2.setGraph(g2.generateNodeMap(size));
+        g2.setAlgorithm(d2);
+        new Render(g2).startRendering();
     }
 
     start() {
+        if (this.hasFoundOptimalPath || this.isSearching) {
+            return; 
+        }
+
         this.i = 0;
         this.isSearching = true;
-
-      
     }
 
     renderFrame() {
-
-       
         if (this.isSearching) {
             this.i++;
             //console.log("i:", this.i);
-            if (this.i >= 4) {
+            if (this.i >= 1) {
                 console.log("Searching...");
                 if(this.graph.algorithm) {
                     let result = this.graph.algorithm.calculate(this.startNode, this.targetNode);
@@ -246,10 +247,9 @@ class Render {
         for (const node in this.graph.nodes) {
             const { x, y } = this.graph.nodes[node];
 
-            if(this.startNode === node) {
+            if(this.startNode === node && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#ff0000"; // rød farve
-                console.log("Start Node:", node);
-            } else if(this.targetNode === node) {
+            } else if(this.targetNode === node && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#0000ff"; // blå farve
             } else if (this.graph.searchedNodes.includes(node) && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#facc00"; // gul farve

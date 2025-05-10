@@ -9,12 +9,11 @@ class Dijkstra {
 
     setGraph(graph) {
         this.graph = graph;
-        console.log(graph.nodes);
 
         this.nodes = Object.fromEntries(Object.entries(graph.nodes).map(([key, value]) => {
             return [key, {
                 ...value,
-                weight: Infinity,
+                g: Infinity,
                 previousNode: null
             }];
         }));
@@ -25,44 +24,51 @@ class Dijkstra {
     calculate(startNodeKey, targetNodeKey) {
         if (!this.startNode) {
             this.startNode = this.nodes[startNodeKey];
-            this.startNode.weight = 0;
+            this.startNode.g = 0;
         }
-    
+
         if (!this.targetNode) {
             this.targetNode = this.nodes[targetNodeKey];
             this.targetNodeKey = targetNodeKey;
         }
+
         if (this.hasVisited.length >= Object.keys(this.nodes).length)
             return this.hasVisited;
-    
 
-        // skal simplificeres
         const unvisited = Object.entries(this.nodes)
             .filter(([key]) => !this.hasVisited.includes(key))
-            .sort(([, a], [, b]) => a.weight - b.weight);
-    
+            .sort(([, a], [, b]) => a.g - b.g);
+
         if (unvisited.length === 0)
             return false;
-    
+
         const [currentKey, currentNode] = unvisited[0];
         this.hasVisited.push(currentKey);
-    
+
         if (currentKey === targetNodeKey)
             return true;
-    
+
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
-            const weightToNeighbour = neighbours[neighbourKey]; // e.g., 2
+            const weightToNeighbour = neighbours[neighbourKey];
             const neighbourNode = this.nodes[neighbourKey];
-            const totalWeight = currentNode.weight + weightToNeighbour;
-    
-            if (totalWeight < neighbourNode.weight) {
-                neighbourNode.weight = totalWeight;
+            const tentativeG = currentNode.g + weightToNeighbour;
+
+            if (tentativeG < neighbourNode.g) {
+                neighbourNode.g = tentativeG;
                 neighbourNode.previousNode = currentKey;
             }
         }
-    
+
         return this.hasVisited;
+    }
+
+    heuristic(nodeKey, targetKey) {
+        const node = this.graph.nodes[nodeKey];
+        const target = this.graph.nodes[targetKey];
+        const dx = node.x - target.x;
+        const dy = node.y - target.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     getShortestPath() {
