@@ -112,6 +112,12 @@ class Render {
         this.canvas.style.backgroundColor = "#737373"
 
 
+        const nodeKeys = Object.keys(this.graph.nodes);
+
+        this.startNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
+        this.targetNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
+    
+
         this.startPosition = {
             // center for vores canvas at skrive på.
             // canvas størelse trukket fra udregnet størrelse af vores "map" i pixels (Tror ikke der er nogen scenarier hvor det ikke er centeret)
@@ -139,6 +145,7 @@ class Render {
         console.log("Start Position:", this.startPosition);
 
         this.hoveredTile = null;
+        this.hasFoundOptimalPath = false;
 
         this.canvas.addEventListener("mousemove", (e) => {
             const rect = this.canvas.getBoundingClientRect();
@@ -178,18 +185,16 @@ class Render {
     reset() {
         this.graph.searchedNodes = [];
         this.isSearching = false;
-        this.graph.algorithm = null;
+        
+        this.stopRendering();
+        delete this;
     }
 
     start() {
         this.i = 0;
         this.isSearching = true;
 
-        const nodeKeys = Object.keys(this.graph.nodes);
-                    
-        this.startNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
-        this.targetNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
-    
+      
     }
 
     renderFrame() {
@@ -210,7 +215,7 @@ class Render {
                     } else if (result === true) {
                         console.log("Path found");
                         this.graph.searchedNodes = this.graph.algorithm.getShortestPath();
-
+                        this.hasFoundOptimalPath = true;
                         this.isSearching = false;
                     }
                     
@@ -241,9 +246,15 @@ class Render {
         for (const node in this.graph.nodes) {
             const { x, y } = this.graph.nodes[node];
 
-            //console.log(this.graph.searchedNodes)
-            if (this.graph.searchedNodes.includes(node)) {
+            if(this.startNode === node) {
+                this.ctx.fillStyle = "#ff0000"; // rød farve
+                console.log("Start Node:", node);
+            } else if(this.targetNode === node) {
+                this.ctx.fillStyle = "#0000ff"; // blå farve
+            } else if (this.graph.searchedNodes.includes(node) && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#facc00"; // gul farve
+            } else if (this.hasFoundOptimalPath && this.graph.searchedNodes.includes(node)) {
+                this.ctx.fillStyle = "#00ff00"; // grøn farve
             } else {
                 this.ctx.fillStyle = this.getTileColor(node).shade;
             }

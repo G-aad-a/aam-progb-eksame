@@ -19,15 +19,8 @@ class Dijkstra {
             }];
         }));
 
-        //const startNode = graph.no(node => node.name === startName);
         this.hasVisited = [];
-      
     }
-
-    #sortGraph = () => {
-        const sortedEntries = Object.entries(this.nodes).sort(([, a], [, b]) => a.weight - b.weight);
-        this.nodes = Object.fromEntries(sortedEntries);
-    };
 
     calculate(startNodeKey, targetNodeKey) {
         if (!this.startNode) {
@@ -42,7 +35,8 @@ class Dijkstra {
         if (this.hasVisited.length >= Object.keys(this.nodes).length)
             return this.hasVisited;
     
-        // Get all unvisited nodes and sort by weight
+
+        // skal simplificeres
         const unvisited = Object.entries(this.nodes)
             .filter(([key]) => !this.hasVisited.includes(key))
             .sort(([, a], [, b]) => a.weight - b.weight);
