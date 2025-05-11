@@ -98,6 +98,8 @@ class Render {
         this.mapHeight = mapHeight;
         this.margin = 10;
 
+        this.hasReset = false;
+
         this.width = this.mapWidth * (this.tileSize + this.margin)
         this.height = this.mapHeight * (this.tileSize + this.margin)
 
@@ -164,6 +166,9 @@ class Render {
         });
 
         this.canvas.addEventListener("click", (e) => {
+            if(this.hasReset)
+                return;
+            
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
@@ -194,11 +199,10 @@ class Render {
     }
 
     reset() {
+        this.hasReset = true;
         this.stopRendering();
         let g2 = new Graph();
-        let d2 = new Dijkstra();
         g2.setGraph(g2.generateNodeMap(size));
-        g2.setAlgorithm(d2);
         let r  = new Render(g2)
         r.currentButton = null;
         r.startRendering();
