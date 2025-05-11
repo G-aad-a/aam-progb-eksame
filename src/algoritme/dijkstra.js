@@ -50,7 +50,7 @@ class Dijkstra {
 
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
-            const weightToNeighbour = neighbours[neighbourKey];
+            const weightToNeighbour = this.graph.weights[currentKey][neighbourKey];
             const neighbourNode = this.nodes[neighbourKey];
             const tentativeG = currentNode.g + weightToNeighbour;
 
