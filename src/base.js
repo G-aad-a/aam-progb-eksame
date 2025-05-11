@@ -146,6 +146,7 @@ class Render {
             { label: "Start", x: startX + buttonWidth + buttonGap, y: buttonY, width: buttonWidth, height: buttonHeight },
             { label: "Dijkstra", x: startX, y: buttonY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight },
             { label: "Astar", x: startX + buttonWidth + buttonGap, y: buttonY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight },
+            { label: "Bellman-Ford", x: startX + 2*buttonWidth + 2*buttonGap, y: buttonY + buttonHeight + buttonGap, width: buttonWidth, height: buttonHeight },
         ];
 
         console.log("Start Position:", this.startPosition);
@@ -191,6 +192,11 @@ class Render {
                         this.graph.setAlgorithm(new Astar());
                         this.currentButton = button.label;
                     }
+                    else if(button.label === "Bellman-Ford") {
+                        this.graph.setAlgorithm(new BellmanFord());
+                        this.currentButton = button.label;
+                    }
+
                     
                 }
             }
