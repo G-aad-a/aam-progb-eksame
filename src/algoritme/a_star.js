@@ -4,7 +4,7 @@ class Astar {
         this.nodes = [];
         this.startNode = null;
         this.targetNode = null;
-        this.hasVisited = [];
+        this.visited = new Set();
     }
 
     setGraph(graph) {
@@ -19,7 +19,7 @@ class Astar {
             }];
         }));
 
-        this.hasVisited = [];
+        this.visited = new Set();
     }
 
     calculate(startNodeKey, targetNodeKey) {
@@ -34,21 +34,21 @@ class Astar {
             this.targetNodeKey = targetNodeKey;
         }
 
-        if (this.hasVisited.length >= Object.keys(this.nodes).length)
+        if (this.visited.length >= Object.keys(this.nodes).length)
             return { status: "unreachable" };
 
         const unvisited = Object.entries(this.nodes)
-            .filter(([key]) => !this.hasVisited.includes(key))
+            .filter(([key]) => !this.visited.has(key))
             .sort(([, a], [, b]) => a.f - b.f);
 
         if (unvisited.length === 0)
             return { status: "unreachable" };
 
         const [currentKey, currentNode] = unvisited[0];
-        this.hasVisited.push(currentKey);
+        this.visited.add(currentKey);
 
         if (currentKey === targetNodeKey)
-            return { status: "done", path: currentKey };
+            return { status: "done", path: this.getShortestPath() };
 
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
@@ -63,7 +63,7 @@ class Astar {
             }
         }
 
-        return { status: "running", path: this.hasVisited };
+        return { status: "running", path: Array.from(this.visited) };
     }
 
     heuristic(nodeKey, targetKey) {

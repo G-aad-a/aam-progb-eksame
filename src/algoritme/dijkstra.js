@@ -4,7 +4,7 @@ class Dijkstra {
         this.nodes = [];
         this.startNode = null;
         this.targetNode = null;
-        this.hasVisited = [];
+        this.hasVisited = new Set();
     }
 
     setGraph(graph) {
@@ -18,7 +18,7 @@ class Dijkstra {
             }];
         }));
 
-        this.hasVisited = [];
+        this.hasVisited = new Set();
     }
 
     calculate(startNodeKey, targetNodeKey) {
@@ -32,18 +32,19 @@ class Dijkstra {
             this.targetNodeKey = targetNodeKey;
         }
 
+
         if (this.hasVisited.length >= Object.keys(this.nodes).length)
             return { status: "unreachable" };
 
         const unvisited = Object.entries(this.nodes)
-            .filter(([key]) => !this.hasVisited.includes(key))
+            .filter(([key]) => !this.hasVisited.has(key))
             .sort(([, a], [, b]) => a.g - b.g);
 
         if (unvisited.length === 0)
             return { status: "unreachable" };
 
         const [currentKey, currentNode] = unvisited[0];
-        this.hasVisited.push(currentKey);
+        this.hasVisited.add(currentKey);
 
         if (currentKey === targetNodeKey)
             return { status: "done", path: this.getShortestPath() };;
@@ -60,7 +61,7 @@ class Dijkstra {
             }
         }
 
-        return { status: "running", path: this.hasVisited };
+        return { status: "running", path: Array.from(this.hasVisited) };
     }
 
     getShortestPath() {

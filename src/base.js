@@ -253,7 +253,7 @@ class Render {
                     }
                     else if (result.status === "done") {
                         console.log("Done");
-                        this.graph.searchedNodes = this.graph.algorithm.getShortestPath();
+                        this.graph.searchedNodes = result.path;
                         this.hasFoundOptimalPath = true;
                         this.isSearching = false;
                     }
