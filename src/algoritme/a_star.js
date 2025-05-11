@@ -35,20 +35,20 @@ class Astar {
         }
 
         if (this.hasVisited.length >= Object.keys(this.nodes).length)
-            return this.hasVisited;
+            return { status: "unreachable" };
 
         const unvisited = Object.entries(this.nodes)
             .filter(([key]) => !this.hasVisited.includes(key))
             .sort(([, a], [, b]) => a.f - b.f);
 
         if (unvisited.length === 0)
-            return false;
+            return { status: "unreachable" };
 
         const [currentKey, currentNode] = unvisited[0];
         this.hasVisited.push(currentKey);
 
         if (currentKey === targetNodeKey)
-            return true;
+            return { status: "done", path: currentKey };
 
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
@@ -63,7 +63,7 @@ class Astar {
             }
         }
 
-        return this.hasVisited;
+        return { status: "running", path: this.hasVisited };
     }
 
     heuristic(nodeKey, targetKey) {

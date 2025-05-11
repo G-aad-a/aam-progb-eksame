@@ -1,14 +1,13 @@
 class BellmanFord {
     constructor() {
         this.nodes = {};
+        this.edges = [];
         this.startNode = null;
         this.targetNode = null;
-        this.hasVisited = [];
+        this.pass = 0;
+        this.edgeIndex = 0;
+        this.maxPasses = 0;
         this.finished = false;
-
-        this.edges = [];      // Liste over alle kanter
-        this.edgeIndex = 0;   // Hvilken kant vi er på
-        this.pass = 0;        // Hvilket gennemløb vi er i
     }
 
     setGraph(graph) {
@@ -19,66 +18,72 @@ class BellmanFord {
                 { ...value, g: Infinity, previousNode: null }
             ])
         );
-        this.startNode = null;
-        this.targetNode = null;
-        this.hasVisited = [];
-        this.finished = false;
-        this.pass = 0;
-        this.edgeIndex = 0;
 
-        // Generér kantliste
         this.edges = [];
         for (const [u, neighbors] of Object.entries(graph.edges)) {
             for (const v of Object.keys(neighbors)) {
                 this.edges.push([u, v]);
             }
         }
+
+        this.startNode = null;
+        this.targetNode = null;
+        this.pass = 0;
+        this.edgeIndex = 0;
+        this.maxPasses = Object.keys(this.nodes).length - 1;
+        this.finished = false;
     }
 
-    calculate(startNodeKey, targetNodeKey) {
-        if (this.finished) {
-            return true;
-        }
 
+    calculate(startKey, targetKey) {
         if (!this.startNode) {
-            this.startNode = startNodeKey;
-            this.targetNode = targetNodeKey;
-            this.nodes[startNodeKey].g = 0;
+            this.startNode = startKey;
+            this.targetNode = targetKey;
+            this.nodes[startKey].g = 0;
         }
 
-        if (this.pass >= Object.keys(this.nodes).length - 1) {
-            this.finished = true;
-            return true;
-        }
+        if (this.finished || !this.startNode) return;
 
-        // Behandl ALLE kanter i ét gennemløb
-        
-        if (this.edgeIndex < this.edges.length) {
-                const [u, v] = this.edges[this.edgeIndex];
+        if (this.pass >= this.maxPasses) {
+            // Check for negative cycles
+            for (const [u, v] of this.edges) {
                 const weight = this.graph.weights[u][v];
                 if (this.nodes[u].g + weight < this.nodes[v].g) {
-                    this.nodes[v].g = this.nodes[u].g + weight;
-                    this.nodes[v].previousNode = u;
+                    this.finished = true;
+                    return { status: "error", message: "Negative weight cycle detected" };
                 }
-                this.edgeIndex++;
             }
-        
 
-        
-        this.hasVisited = Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
-        return this.hasVisited;
+            this.finished = true;
+            return { status: "done", path: this.getShortestPath() };
+        }
+
+        // === Perform one full pass ===
+        for (const [u, v] of this.edges) {
+            const weight = this.graph.weights[u][v];
+            if (this.nodes[u].g + weight < this.nodes[v].g) {
+                this.nodes[v].g = this.nodes[u].g + weight;
+                this.nodes[v].previousNode = u;
+            }
+        }
+
+        this.pass++; // Increase pass after full edge loop
+
+        return { status: "running", path: this.getVisited() };
+    }
+    getVisited() {
+        return Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
     }
 
     getShortestPath() {
         const path = [];
-        let currentNode = this.targetNode;
-        while (currentNode) {
-            path.unshift(currentNode);
-            currentNode = this.nodes[currentNode].previousNode;
+        let current = this.targetNode;
+
+        while (current) {
+            path.unshift(current);
+            current = this.nodes[current].previousNode;
         }
-        return path;
+
+        return path.length ? path : null;
     }
 }
-
-    
-

@@ -5,7 +5,6 @@ class Dijkstra {
         this.startNode = null;
         this.targetNode = null;
         this.hasVisited = [];
-        this.unvisitedQueue = [];
     }
 
     setGraph(graph) {
@@ -20,37 +19,34 @@ class Dijkstra {
         }));
 
         this.hasVisited = [];
-        this.unvisitedQueue = [];
     }
 
-   calculate(startNodeKey, targetNodeKey) {
-        // Initialize start and target only once
+    calculate(startNodeKey, targetNodeKey) {
         if (!this.startNode) {
             this.startNode = this.nodes[startNodeKey];
-            this.targetNode = this.nodes[targetNodeKey];
-            this.targetNodeKey = targetNodeKey;
             this.startNode.g = 0;
-
-            // Initialize the unvisitedQueue
-            this.unvisitedQueue = Object.keys(this.nodes);
         }
 
-        // If nothing left to process, stop
-        if (this.unvisitedQueue.length === 0) return false;
+        if (!this.targetNode) {
+            this.targetNode = this.nodes[targetNodeKey];
+            this.targetNodeKey = targetNodeKey;
+        }
 
-        // Sort unvisited by current 'g' cost
-        this.unvisitedQueue.sort((aKey, bKey) => {
-            return this.nodes[aKey].g - this.nodes[bKey].g;
-        });
+        if (this.hasVisited.length >= Object.keys(this.nodes).length)
+            return { status: "unreachable" };
 
-        const currentKey = this.unvisitedQueue.shift();
-        const currentNode = this.nodes[currentKey];
+        const unvisited = Object.entries(this.nodes)
+            .filter(([key]) => !this.hasVisited.includes(key))
+            .sort(([, a], [, b]) => a.g - b.g);
 
-        
+        if (unvisited.length === 0)
+            return { status: "unreachable" };
+
+        const [currentKey, currentNode] = unvisited[0];
         this.hasVisited.push(currentKey);
 
-        // If target found, stop
-        if (currentKey === targetNodeKey) return true;
+        if (currentKey === targetNodeKey)
+            return { status: "done", path: this.getShortestPath() };;
 
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
@@ -64,7 +60,7 @@ class Dijkstra {
             }
         }
 
-        return false; // return true if finished
+        return { status: "running", path: this.hasVisited };
     }
 
     getShortestPath() {

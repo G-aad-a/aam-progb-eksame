@@ -61,7 +61,7 @@ class Graph {
                     if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
                         const neighborName = this.#nodeName(nx, ny);
                         edges[name][neighborName] = 1;
-                        weights[name][neighborName] = Math.floor(Math.random() * 10) + 1;
+                        weights[name][neighborName] = 1//Math.floor(Math.random() * 10) + 1;
                     }
                 }
             }
@@ -89,10 +89,22 @@ class Render {
         return { shade: `rgb(${shade}, ${shade}, ${shade})`, intShade: shade }; // darker = higher cost
     };
 
+    getRandomColor = () => {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+
     constructor(graph) {
         const { mapWidth, mapHeight, tileSize } = graph.size;
 
         this.graph = graph;
+        this.searchedNodesColor = null;
+
         this.tileSize = tileSize;
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
@@ -118,7 +130,7 @@ class Render {
 
         this.startNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
         this.targetNode = nodeKeys[Math.floor(Math.random() * nodeKeys.length)];
-    
+        
 
         this.startPosition = {
             // center for vores canvas at skrive på.
@@ -184,6 +196,9 @@ class Render {
                     if (button.label === "Reset") {
                         this.reset(); 
                     } else if (button.label === "Start") {
+                        if(!this.graph.algorithm) {
+                            return alert("Please select an algorithm first!");
+                        }
                         this.start(); 
                     } else if(button.label === "Dijkstra") {
                         this.graph.setAlgorithm(new Dijkstra());
@@ -206,7 +221,6 @@ class Render {
 
     reset() {
         this.hasReset = true;
-        this.stopRendering();
         let g2 = new Graph();
         g2.setGraph(g2.generateNodeMap(size));
         let r  = new Render(g2)
@@ -225,24 +239,30 @@ class Render {
     }
 
     renderFrame() {
+        if (this.hasReset) {
+            return;
+        }
         if (this.isSearching) {
-
-            console.log("i:", this.i);
-            console.log("Performance.now:", performance.now() - this.i);
-            if (performance.now() - this.i>= 100) {
-                console.log("Searching...");
+            if (performance.now() - this.i >= 100 ) {
+                //console.log("Searching...", this.algorithm instanceof Dijkstra);
                 if(this.graph.algorithm) {
                     let result = this.graph.algorithm.calculate(this.startNode, this.targetNode);
-                    if (typeof result === "object") {
-                        this.graph.searchedNodes = result;
-                    } else if (result === false) {
-                        console.log("No path found");
+                    if (result.status === "unreachable") {
+                        console.log("Unreachable");
                         this.isSearching = false;
-                    } else if (result === true) {
-                        console.log("Path found");
+                    }
+                    else if (result.status === "done") {
+                        console.log("Done");
                         this.graph.searchedNodes = this.graph.algorithm.getShortestPath();
                         this.hasFoundOptimalPath = true;
                         this.isSearching = false;
+                    }
+                    else if (result.status === "running") {
+                        //console.log("Running");
+                        if (this.graph.algorithm instanceof BellmanFord) {
+                            this.searchedNodesColor = this.getRandomColor();
+                        } 
+                        this.graph.searchedNodes = result.path;
                     }
                     
                     console.log("Searched Nodes:", this.graph.searchedNodes);
@@ -276,6 +296,8 @@ class Render {
                 this.ctx.fillStyle = "#ff0000"; // rød farve
             } else if(this.targetNode === node && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#0000ff"; // blå farve
+            } else if (this.graph.searchedNodes.includes(node) && this.searchedNodesColor != null && !this.hasFoundOptimalPath) {
+                this.ctx.fillStyle = this.searchedNodesColor; // gul farve
             } else if (this.graph.searchedNodes.includes(node) && !this.hasFoundOptimalPath) {
                 this.ctx.fillStyle = "#facc00"; // gul farve
             } else if (this.hasFoundOptimalPath && this.graph.searchedNodes.includes(node)) {
@@ -343,9 +365,6 @@ class Render {
         this.renderFrame();
     }
 
-    stopRendering() {
-        cancelAnimationFrame(this.renderFrame.bind(this));
-    }
 
 }
 
