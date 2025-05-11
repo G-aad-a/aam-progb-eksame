@@ -1,5 +1,3 @@
-// src/algoritme/bellmanford.js
-
 class BellmanFord {
     constructor() {
         this.nodes = {};
@@ -38,38 +36,38 @@ class BellmanFord {
     }
 
     calculate(startNodeKey, targetNodeKey) {
-    if (this.finished) {
-        return true;
-    }
-
-    if (!this.startNode) {
-        this.startNode = startNodeKey;
-        this.targetNode = targetNodeKey;
-        this.nodes[startNodeKey].g = 0;
-    }
-
-    if (this.pass >= Object.keys(this.nodes).length - 1) {
-        this.finished = true;
-        return true;
-    }
-
-    // Behandl ALLE kanter i ét gennemløb
-    
-    if (this.edgeIndex < this.edges.length) {
-            const [u, v] = this.edges[this.edgeIndex];
-            const weight = this.graph.weights[u][v];
-            if (this.nodes[u].g + weight < this.nodes[v].g) {
-                this.nodes[v].g = this.nodes[u].g + weight;
-                this.nodes[v].previousNode = u;
-            }
-            this.edgeIndex++;
+        if (this.finished) {
+            return true;
         }
-    
 
-    
-    this.hasVisited = Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
-    return this.hasVisited;
-}
+        if (!this.startNode) {
+            this.startNode = startNodeKey;
+            this.targetNode = targetNodeKey;
+            this.nodes[startNodeKey].g = 0;
+        }
+
+        if (this.pass >= Object.keys(this.nodes).length - 1) {
+            this.finished = true;
+            return true;
+        }
+
+        // Behandl ALLE kanter i ét gennemløb
+        
+        if (this.edgeIndex < this.edges.length) {
+                const [u, v] = this.edges[this.edgeIndex];
+                const weight = this.graph.weights[u][v];
+                if (this.nodes[u].g + weight < this.nodes[v].g) {
+                    this.nodes[v].g = this.nodes[u].g + weight;
+                    this.nodes[v].previousNode = u;
+                }
+                this.edgeIndex++;
+            }
+        
+
+        
+        this.hasVisited = Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
+        return this.hasVisited;
+    }
 
     getShortestPath() {
         const path = [];

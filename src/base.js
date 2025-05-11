@@ -220,15 +220,16 @@ class Render {
             return; 
         }
 
-        this.i = 0;
+        this.i = performance.now();
         this.isSearching = true;
     }
 
     renderFrame() {
         if (this.isSearching) {
-            this.i++;
-            //console.log("i:", this.i);
-            if (this.i >= 6) {
+
+            console.log("i:", this.i);
+            console.log("Performance.now:", performance.now() - this.i);
+            if (performance.now() - this.i>= 100) {
                 console.log("Searching...");
                 if(this.graph.algorithm) {
                     let result = this.graph.algorithm.calculate(this.startNode, this.targetNode);
@@ -246,7 +247,7 @@ class Render {
                     
                     console.log("Searched Nodes:", this.graph.searchedNodes);
                 }
-                this.i = 0;
+                this.i = performance.now();
             }
         }
 

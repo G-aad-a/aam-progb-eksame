@@ -5,6 +5,7 @@ class Dijkstra {
         this.startNode = null;
         this.targetNode = null;
         this.hasVisited = [];
+        this.unvisitedQueue = [];
     }
 
     setGraph(graph) {
@@ -19,34 +20,37 @@ class Dijkstra {
         }));
 
         this.hasVisited = [];
+        this.unvisitedQueue = [];
     }
 
-    calculate(startNodeKey, targetNodeKey) {
+   calculate(startNodeKey, targetNodeKey) {
+        // Initialize start and target only once
         if (!this.startNode) {
             this.startNode = this.nodes[startNodeKey];
-            this.startNode.g = 0;
-        }
-
-        if (!this.targetNode) {
             this.targetNode = this.nodes[targetNodeKey];
             this.targetNodeKey = targetNodeKey;
+            this.startNode.g = 0;
+
+            // Initialize the unvisitedQueue
+            this.unvisitedQueue = Object.keys(this.nodes);
         }
 
-        if (this.hasVisited.length >= Object.keys(this.nodes).length)
-            return this.hasVisited;
+        // If nothing left to process, stop
+        if (this.unvisitedQueue.length === 0) return false;
 
-        const unvisited = Object.entries(this.nodes)
-            .filter(([key]) => !this.hasVisited.includes(key))
-            .sort(([, a], [, b]) => a.g - b.g);
+        // Sort unvisited by current 'g' cost
+        this.unvisitedQueue.sort((aKey, bKey) => {
+            return this.nodes[aKey].g - this.nodes[bKey].g;
+        });
 
-        if (unvisited.length === 0)
-            return false;
+        const currentKey = this.unvisitedQueue.shift();
+        const currentNode = this.nodes[currentKey];
 
-        const [currentKey, currentNode] = unvisited[0];
+        
         this.hasVisited.push(currentKey);
 
-        if (currentKey === targetNodeKey)
-            return true;
+        // If target found, stop
+        if (currentKey === targetNodeKey) return true;
 
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
@@ -60,7 +64,7 @@ class Dijkstra {
             }
         }
 
-        return this.hasVisited;
+        return false; // return true if finished
     }
 
     getShortestPath() {
