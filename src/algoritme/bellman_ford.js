@@ -42,10 +42,9 @@ class BellmanFord {
             this.nodes[startKey].g = 0;
         }
 
-        if (this.finished || !this.startNode) return;
+        if (this.finished) return;
 
         if (this.pass >= this.maxPasses) {
-            // Check for negative cycles
             for (const [u, v] of this.edges) {
                 const weight = this.graph.weights[u][v];
                 if (this.nodes[u].g + weight < this.nodes[v].g) {
@@ -58,19 +57,26 @@ class BellmanFord {
             return { status: "done", path: this.getShortestPath() };
         }
 
-        // === Perform one full pass ===
+        let updated = false;
         for (const [u, v] of this.edges) {
             const weight = this.graph.weights[u][v];
             if (this.nodes[u].g + weight < this.nodes[v].g) {
                 this.nodes[v].g = this.nodes[u].g + weight;
                 this.nodes[v].previousNode = u;
+                updated = true;
             }
         }
 
-        this.pass++; // Increase pass after full edge loop
+        this.pass++;
+
+        if (!updated) {
+            this.finished = true;
+            return { status: "done", path: this.getShortestPath() };
+        }
 
         return { status: "running", path: this.getVisited() };
     }
+    
     getVisited() {
         return Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
     }

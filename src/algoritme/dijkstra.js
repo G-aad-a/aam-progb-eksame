@@ -61,7 +61,7 @@ class Dijkstra {
             }
         }
 
-        return { status: "running", path: Array.from(this.hasVisited) };
+        return { status: "running", path: Array.from(this.hasVisited)    };
     }
 
     getShortestPath() {

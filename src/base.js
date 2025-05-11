@@ -28,6 +28,7 @@ class Graph {
         return this;
     }
 
+
     generateNodeMap(size) {
         const { mapWidth, mapHeight } = size;
         if (mapWidth <= 0 || mapHeight <= 0) return null;
@@ -253,6 +254,7 @@ class Render {
                     }
                     else if (result.status === "done") {
                         console.log("Done");
+                        
                         this.graph.searchedNodes = result.path;
                         this.hasFoundOptimalPath = true;
                         this.isSearching = false;
@@ -281,12 +283,14 @@ class Render {
 
 
         // draw Text
+        let className = this.graph.algorithm ? this.graph.algorithm.constructor.name : "No chosen algorithm";
+
         this.ctx.fillStyle = "#FFFFFF";
         this.ctx.font = "20px Arial";
-        this.ctx.fillText("Graph Visualization", 10, 20);
+        this.ctx.fillText("(A)lfred & (A)ugustas & (M)arco AAM Graph Visualization", 10, 20);
         this.ctx.fillText("Node Size: " + this.mapWidth * this.mapHeight, 10, 50);
-        this.ctx.fillText("Tile Size: " + this.tileSize, 10, 80);
-        this.ctx.fillText("Margin: " + this.margin, 10, 110);
+        this.ctx.fillText("SearchNodes: " + Object.keys(this.graph.searchedNodes).length, 10, 80);
+        this.ctx.fillText("Distance Found: " + className, 10, 110);
 
         // draw grid
         for (const node in this.graph.nodes) {
