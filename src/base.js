@@ -61,7 +61,7 @@ class Graph {
                     if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
                         const neighborName = this.#nodeName(nx, ny);
                         edges[name][neighborName] = 1;
-                        weights[name][neighborName] = 1//Math.floor(Math.random() * 10) + 1;
+                        weights[name][neighborName] = Math.floor(Math.random() * 10) + 1;
                     }
                 }
             }
