@@ -54,15 +54,19 @@ class BellmanFord {
     }
 
     // Behandl ALLE kanter i ét gennemløb
-    for (const [u, v] of this.edges) {
-        const weight = this.graph.weights[u][v];
-        if (this.nodes[u].g + weight < this.nodes[v].g) {
-            this.nodes[v].g = this.nodes[u].g + weight;
-            this.nodes[v].previousNode = u;
+    
+    if (this.edgeIndex < this.edges.length) {
+            const [u, v] = this.edges[this.edgeIndex];
+            const weight = this.graph.weights[u][v];
+            if (this.nodes[u].g + weight < this.nodes[v].g) {
+                this.nodes[v].g = this.nodes[u].g + weight;
+                this.nodes[v].previousNode = u;
+            }
+            this.edgeIndex++;
         }
-    }
+    
 
-    this.pass++;
+    
     this.hasVisited = Object.keys(this.nodes).filter(k => this.nodes[k].g !== Infinity);
     return this.hasVisited;
 }
