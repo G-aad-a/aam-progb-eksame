@@ -290,7 +290,7 @@ class Render {
         this.ctx.fillText("(A)lfred & (A)ugustas & (M)arco AAM Graph Visualization", 10, 20);
         this.ctx.fillText("Node Size: " + this.mapWidth * this.mapHeight, 10, 50);
         this.ctx.fillText("SearchNodes: " + Object.keys(this.graph.searchedNodes).length, 10, 80);
-        this.ctx.fillText("Distance Found: " + className, 10, 110);
+        this.ctx.fillText("Algorithm: " + className, 10, 110);
 
         // draw grid
         for (const node in this.graph.nodes) {
