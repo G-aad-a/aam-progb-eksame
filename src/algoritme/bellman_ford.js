@@ -18,7 +18,11 @@ class BellmanFord {
         this.nodes = Object.fromEntries(
             Object.entries(graph.nodes).map(([key, value]) => [
                 key,
-                { ...value, g: Infinity, previousNode: null }
+                { 
+                    ...value, 
+                    g: Infinity, 
+                    previousNode: null 
+                }
             ])
         );
 

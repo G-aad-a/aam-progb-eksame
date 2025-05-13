@@ -81,12 +81,8 @@ class Render {
 
     getTileColor = (nodeIndex) => {
         const weight = this.graph.weights[nodeIndex];
-        //const weightValues = Object.values(weight); // tager kun value istedet for key:value i nodens weights
-
-        let cost = Math.min(weight); // finder den mindste værdi i weightValues arrayet hvis at længden er større end 0 ellers returner 0
-        cost = Math.max(0, Math.min(cost, 10)); // clamper for at holde værdien mellem 0 og 10
-        const shade = 255 - cost * 25;
-        return { shade: `rgb(${shade}, ${shade}, ${shade})`, intShade: shade }; // darker = higher cost
+        const shade = 255 - weight * 25; // den er mellem 1 og 10 og gange med 25 giver en værdi mellem 25 og 255
+        return { shade: `rgb(${shade}, ${shade}, ${shade})` }; // darker = higher cost
     };
 
     getRandomColor = () => {
