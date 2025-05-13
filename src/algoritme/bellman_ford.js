@@ -53,7 +53,7 @@ class BellmanFord {
         // tjekker for negative cykler efter maksimalt antal gennemløb
         if (this.pass >= this.maxPasses) {
             for (const [u, v] of this.edges) {
-                const weight = this.graph.weights[u][v];
+                const weight = this.graph.weights[v];
                 if (this.nodes[u].g + weight < this.nodes[v].g) {
                     this.finished = true;
                     return { status: "error", message: "Negative weight cycle detected" };
@@ -67,7 +67,7 @@ class BellmanFord {
         // opdaterer afstande for alle kanter
         let updated = false;
         for (const [u, v] of this.edges) {
-            const weight = this.graph.weights[u][v];
+            const weight = this.graph.weights[v];
             if (this.nodes[u].g + weight < this.nodes[v].g) {
                 this.nodes[v].g = this.nodes[u].g + weight;
                 this.nodes[v].previousNode = u;

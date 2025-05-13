@@ -61,7 +61,7 @@ class Astar {
         // opdaterer afstande og f-værdier for nabonoder
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
-            const weightToNeighbour = this.graph.weights[currentKey][neighbourKey];
+            const weightToNeighbour = this.graph.weights[neighbourKey];
             const neighbourNode = this.nodes[neighbourKey];
             const tentativeG = currentNode.g + weightToNeighbour;
 
@@ -82,7 +82,7 @@ class Astar {
         const target = this.graph.nodes[targetKey];
         const dx = node.x - target.x;
         const dy = node.y - target.y;
-        return Math.sqrt(dx * dx + dy * dy);
+        return Math.sqrt(dx * dx + dy * dy) * 2;
     }
 
     // viser den korteste path fra start til mål
