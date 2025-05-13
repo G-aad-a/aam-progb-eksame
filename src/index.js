@@ -1,7 +1,7 @@
 
 const size = {
-    mapWidth: 9,
-    mapHeight: 9,
+    mapWidth: 7,
+    mapHeight: 7,
     tileSize: 50,
 };
 

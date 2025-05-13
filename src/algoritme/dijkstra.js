@@ -56,15 +56,20 @@ class Dijkstra {
         if (currentKey === targetNodeKey)
             return { status: "done", path: this.getShortestPath() };;
 
+
+        console.log(this.graph.weights);
         // opdaterer afstande og f-værdier for nabonoder
         const neighbours = this.graph.edges[currentKey];
         for (const neighbourKey in neighbours) {
-            const weightToNeighbour = this.graph.weights[currentKey][neighbourKey];
+            console.log(neighbourKey, currentKey);
+
+            const weightToNeighbour = this.graph.weights[neighbourKey];
             const neighbourNode = this.nodes[neighbourKey];
             const tentativeG = currentNode.g + weightToNeighbour;
 
             // hvis vi finder en kortere path opdaterer vi den
             if (tentativeG < neighbourNode.g) {
+                console.log(`Updating node ${neighbourKey} from ${neighbourNode.g} to ${tentativeG} w ${weightToNeighbour}`);
                 neighbourNode.g = tentativeG;
                 neighbourNode.previousNode = currentKey;
             }

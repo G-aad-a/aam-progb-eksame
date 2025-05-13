@@ -43,7 +43,7 @@ class Graph {
                 const name = this.#nodeName(x, y);
                 nodes[name] = { x, y };
                 edges[name] = {};
-                weights[name] = {};
+                weights[name] = Math.floor(Math.random() * 10) + 1;
             }
         }
 
@@ -62,7 +62,6 @@ class Graph {
                     if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight) {
                         const neighborName = this.#nodeName(nx, ny);
                         edges[name][neighborName] = 1;
-                        weights[name][neighborName] = Math.floor(Math.random() * 10) + 1;
                     }
                 }
             }
@@ -82,9 +81,9 @@ class Render {
 
     getTileColor = (nodeIndex) => {
         const weight = this.graph.weights[nodeIndex];
-        const weightValues = Object.values(weight); // tager kun value istedet for key:value i nodens weights
+        //const weightValues = Object.values(weight); // tager kun value istedet for key:value i nodens weights
 
-        let cost = weightValues.length > 0 ? Math.min(...weightValues) : 0; // finder den mindste værdi i weightValues arrayet hvis at længden er større end 0 ellers returner 0
+        let cost = Math.min(weight); // finder den mindste værdi i weightValues arrayet hvis at længden er større end 0 ellers returner 0
         cost = Math.max(0, Math.min(cost, 10)); // clamper for at holde værdien mellem 0 og 10
         const shade = 255 - cost * 25;
         return { shade: `rgb(${shade}, ${shade}, ${shade})`, intShade: shade }; // darker = higher cost
@@ -346,16 +345,14 @@ class Render {
 
         if (this.hoveredTile) {
             const { x, y } = this.graph.nodes[this.hoveredTile];
-            const weights = this.graph.weights[this.hoveredTile];
+            const weight = this.graph.weights[this.hoveredTile];
 
             // Get average or min weight
-            const weightList = Object.values(weights);
-            const displayWeight = weightList.length ? Math.min(...weightList) : 0;
-
+            
             // Draw text
             this.ctx.font = "16px sans-serif";
             this.ctx.fillText(
-                `W: ${displayWeight}`,
+                `W: ${weight}`,
                 this.startPosition.x + x * (this.tileSize + this.margin) + 10,
                 this.startPosition.y + y * (this.tileSize + this.margin) + 20
             );
