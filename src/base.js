@@ -304,9 +304,17 @@ class Render {
             } else {
                 this.ctx.fillStyle = this.getTileColor(node).shade;
             }
-            this.ctx.fillRect(this.startPosition.x + x * (this.tileSize + this.margin), this.startPosition.y + y * (this.tileSize + this.margin), this.tileSize, this.tileSize);
+            this.ctx.fillRect(this.startPosition.x + x * (this.tileSize + this.margin), 
+                this.startPosition.y + y * (this.tileSize + this.margin), 
+                this.tileSize, 
+                this.tileSize
+            );
 
-            this.ctx.strokeRect(this.startPosition.x + x * (this.tileSize + this.margin), this.startPosition.y + y * (this.tileSize + this.margin), this.tileSize + 5, this.tileSize + 5);
+            this.ctx.strokeRect(this.startPosition.x + x * (this.tileSize + this.margin), 
+                this.startPosition.y + y * (this.tileSize + this.margin), 
+                this.tileSize + 5, 
+                this.tileSize + 5
+            );
         }
 
         // draw Button

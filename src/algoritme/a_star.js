@@ -40,7 +40,7 @@ class Astar {
         }
 
         // tjekker om målet er unreachable
-        if (this.visited.length >= Object.keys(this.nodes).length)
+        if (this.visited.size >= Object.keys(this.nodes).length)
             return { status: "unreachable" };
 
         // finder den unvisited node med den mindste f-værdi

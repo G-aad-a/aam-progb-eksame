@@ -54,8 +54,7 @@ class Dijkstra {
 
         // hvis vi har nået målet returnerer vi den korteste path
         if (currentKey === targetNodeKey)
-            return { status: "done", path: this.getShortestPath() };;
-
+            return { status: "done", path: this.getShortestPath() };
 
         console.log(this.graph.weights);
         // opdaterer afstande og f-værdier for nabonoder
